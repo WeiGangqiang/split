@@ -12,10 +12,10 @@ module Split
       @cleaned_up = false
     end
 
-    def cleanup_old_experiments!
+    def cleanup_old_experiments! experiment
       return if @cleaned_up
       keys_without_finished(user.keys).each do |key|
-        experiment = ExperimentCatalog.find key_without_version(key)
+        return unless experiment.name == key_without_version(key)
         if experiment.nil? || experiment.has_winner? || experiment.start_time.nil?
           user.delete key
           user.delete Experiment.finished_key(key)

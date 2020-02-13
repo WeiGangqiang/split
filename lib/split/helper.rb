@@ -9,7 +9,6 @@ module Split
       begin
         experiment = ExperimentCatalog.find_or_initialize(metric_descriptor, control, *alternatives)
         alternative = if Split.configuration.enabled && !exclude_visitor?
-          experiment.save
           raise(Split::InvalidExperimentsFormatError) unless (Split.configuration.experiments || {}).fetch(experiment.name.to_sym, {})[:combined_experiments].nil?
           trial = Trial.new(:user => ab_user, :experiment => experiment,
               :override => override_alternative(experiment.name), :exclude => exclude_visitor?,
@@ -37,6 +36,11 @@ module Split
       else
         alternative
       end
+    end
+
+    def ab_test_config(metric_descriptor, control = nil, *alternatives)
+      experiment = ExperimentCatalog.find_or_initialize(metric_descriptor, control, *alternatives)
+      experiment.save
     end
 
     def reset!(experiment)
